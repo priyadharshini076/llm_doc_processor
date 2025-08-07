@@ -1,22 +1,28 @@
-from fastapi import FastAPI, UploadFile, File, Form, Request, Header, HTTPException, Security
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import List
 import requests
-
+import os
+from dotenv import load_dotenv
+import openai
 from embedder import get_pdf_text
 from query_handler import format_prompt, ask_llm
 from sentence_transformers import SentenceTransformer
 from vector_store import embed_and_upsert, search
 
+# Load environment variables
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
+# FastAPI setup
 app = FastAPI(
     title="HackRx Document QA API",
     version="1.0.0",
     description="Answer questions from PDF documents using RAG-based approach."
 )
 
-# CORS for Swagger UI and other clients
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -25,27 +31,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Security scheme for Swagger UI "Authorize" button
+# Bearer token security
 bearer_scheme = HTTPBearer()
 
+# Load embedding model
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# Root check
+# ---------------------
+# ✅ Root Route
+# ---------------------
 @app.get("/")
 def root():
-    return {"message": "PDF Query Bot with GPT-4 + Pinecone is running!"}
+    return {"message": "PDF Query Bot with OpenAI + Pinecone is running!"}
 
-# Original upload + query route
+# ---------------------
+# ✅ Upload + Query Route
+# ---------------------
 @app.post("/process/")
 async def process_file(query: str = Form(...), file: UploadFile = File(...)):
     try:
         file_data = await file.read()
         text = get_pdf_text(file_data)
+
+        # Embed and store vectors
         embed_and_upsert(text, model)
+
+        # Query handling
         query_vector = model.encode(query).tolist()
         relevant_chunks = search(query_vector, top_k=5)
         prompt = format_prompt(query, relevant_chunks)
         response = ask_llm(prompt)
+
         return {
             "query": query,
             "answer": response,
@@ -54,9 +70,9 @@ async def process_file(query: str = Form(...), file: UploadFile = File(...)):
     except Exception as e:
         return {"error": str(e)}
 
-# -------------------------
-# ✅ HackRx API Route
-# -------------------------
+# ---------------------
+# ✅ HackRx API (PDF URL + Questions)
+# ---------------------
 class HackRxInput(BaseModel):
     documents: str
     questions: List[str]
