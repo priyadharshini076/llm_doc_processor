@@ -6,3 +6,5 @@ requests
 pydantic
 sentence-transformers
 python-multipart
+PyPDF2
+faiss-cpu 
