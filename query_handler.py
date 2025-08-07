@@ -1,4 +1,12 @@
-import requests
+import os
+import openai
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Set OpenAI API key
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def format_prompt(query, relevant_chunks, max_chunks=3):
     # Combine only top N chunks to avoid long prompt
@@ -17,18 +25,17 @@ Return your decision in JSON with:
 - justification: explanation with clause references
 """
 
-def ask_llm(prompt, model="gemma:2b"):
+def ask_llm(prompt, model="gpt-4o-mini"):  # or "gpt-3.5-turbo"
     try:
-        response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={
-                "model": model,
-                "prompt": prompt,
-                "stream": False  # set True if streaming is needed
-            },
-            timeout=60  # Optional timeout to prevent hanging
+        response = openai.ChatCompletion.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that answers policy-related queries from documents."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=700
         )
-        response.raise_for_status()
-        return response.json().get("response", "").strip()
-    except requests.exceptions.RequestException as e:
-        return f"LLM Error: {e}"
+        return response.choices[0].message["content"].strip()
+    except Exception as e:
+        return f"LLM Error: {str(e)}"
