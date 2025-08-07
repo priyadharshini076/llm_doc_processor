@@ -1,15 +1,14 @@
 from PyPDF2 import PdfReader
-from sentence_transformers import SentenceTransformer
 import io
 
-model = SentenceTransformer('all-MiniLM-L6-v2')
-
 def get_pdf_text(file_bytes):
+    """
+    Extract text from a PDF (all pages).
+    """
     reader = PdfReader(io.BytesIO(file_bytes))
     text = ""
     for page in reader.pages:
-        text += page.extract_text() + "\n"
+        content = page.extract_text()
+        if content:
+            text += content + "\n"
     return text
-
-def get_embeddings(chunks):
-    return model.encode(chunks).tolist()
