@@ -1,9 +1,8 @@
 fastapi
 uvicorn
-python-multipart
 python-dotenv
 openai
 requests
-PyPDF2
+pydantic
 sentence-transformers
-pinecone-client
+python-multipart
