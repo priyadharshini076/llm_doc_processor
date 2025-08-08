@@ -1,0 +1,9 @@
+# OpenAI API Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Webhook Configuration (Optional)
+WEBHOOK_URL=https://your-webhook-url.com/webhook
+WEBHOOK_SECRET=your_webhook_secret_here
+
+# Optional: Override default webhook secret
+# WEBHOOK_SECRET=my_custom_secret_123
