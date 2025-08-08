@@ -2,7 +2,7 @@ services:
   - type: web
     name: llm_doc_processor
     runtime: python
-    startCommand: uvicorn app:app --host 0.0.0.0 --port 8000
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: OPENAI_API_KEY
-        value: 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
+        sync: false
