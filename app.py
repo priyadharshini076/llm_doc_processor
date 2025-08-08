@@ -15,6 +15,7 @@ from vector_store import embed_and_upsert, search
 # Load environment variables
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
 # FastAPI setup
 app = FastAPI(
     title="HackRx Document QA API",
@@ -113,3 +114,11 @@ async def hackrx_handler(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ---------------------
+# ✅ Entry point for Render / local
+# ---------------------
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))  # Render sets PORT, fallback 8000 for local
+    uvicorn.run("app:app", host="0.0.0.0", port=port)
