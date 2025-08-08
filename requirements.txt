@@ -7,4 +7,5 @@ pydantic
 sentence-transformers
 python-multipart
 PyPDF2
-faiss-cpu 
+faiss-cpu
+pinecone-client
